@@ -3,10 +3,12 @@
 #author: "Liam Snow"
 ---
 #Setting up the packages
-install.packages("dplyr",repos = "http://cran.us.r-project.org",dependencies = TRUE)
+install.packages("dplyr",dependencies = TRUE)
 library(dplyr)
-install.packages("ggplot2",repos = "http://cran.us.r-project.org",dependencies = TRUE)
+install.packages("ggplot2",dependencies = TRUE)
 library(ggplot2)
+library(psych)
+library(caret)
 
 #reading the data  
 Quarter1 = read.csv('C:/Users/Lime/Documents/CKME Capstone/Divvy_Trips_2018_Q1.csv',header = T,sep=',')
@@ -23,6 +25,7 @@ Divvy2018 =rbind(Quarter1,Quarter2,Quarter3,Quarter4)
 
 #Summary Statistics
 dim(Divvy2018)
+str(Divvy2018)
 head(Divvy2018)
 lapply(Divvy2018,class)
 
@@ -35,12 +38,10 @@ Divvy2018$start_time=as.numeric(format(as.POSIXct(Divvy2018$start_time,format='%
 
 #Creating Day of the Week and Month
 Divvy2018$dayofweek=as.factor(weekdays(Divvy2018$start_date,TRUE))
-Divvy2018$month=as.factor(format(Divvy2018$start_date,"%m"))
+Divvy2018$month=format(Divvy2018$start_date,"%m")
 
 #Creating typeofday
 Divvy2018$typeofday=ifelse(Divvy2018$dayofweek %in% c("Sat","Sun"),"weekend","weekday")
-
-summary(Divvy2018)
 
 #Replacing NAs in gender with proportional equivalent of "Male" and "Female"
 set.seed(37)
@@ -75,20 +76,36 @@ Divvy2018$to_station_name=factor(Divvy2018$to_station_name)
 #Removing Unnecessary Attributes
 Divvy2018=within(Divvy2018,rm(from_station_id,to_station_id,bikeid,end_time))
 
+#Final Statistics
+summary(Divvy2018)
+sd(Divvy2018$tripduration)
+
 #Visualizing Data
-ggplot(data=Divvy2018, aes(Divvy2018$tripduration))+geom_histogram(binwidth=150,fill="#B3DDF2")+scale_x_continuous(name = "Trip Duration (s)")+scale_y_continuous(name="Frequency",labels=scales::comma,limits=c(0,600000))+ggtitle("Frequency of Trip Duration")+theme(panel.background = element_rect(fill = 'grey44'))
+ggplot(data=Divvy2018, aes(Divvy2018$tripduration))+geom_histogram(binwidth=150,fill="#B3DDF2")+scale_x_continuous(name = "Trip Duration (s)")+scale_y_continuous(name="Trips in 2018",labels=scales::comma,limits=c(0,600000))+ggtitle("Frequency of Trip Duration")+theme(panel.background = element_rect(fill = 'grey44'))
 
 ggplot(data=Divvy2018, aes(Divvy2018$age))+geom_histogram(binwidth=2,fill="#B3DDF2")+scale_x_continuous(name = "Age")+scale_y_continuous(name="Frequency")+ggtitle("Age of Users")+theme(panel.background = element_rect(fill = 'grey44'))
 
-ggplot(Divvy2018,aes(Divvy2018$gender))+geom_bar(fill="#B3DDF2")+scale_x_discrete(name="Gender")+scale_y_continuous(name="Trips in 2018",labels=scales::comma)+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Trips by Gender in 2018")
+ggplot(Divvy2018,aes(Divvy2018$gender))+geom_bar(fill="#B3DDF2")+scale_x_discrete(name="Gender")+scale_y_continuous(name="Trips in 2018",labels=scales::comma)+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Gender of Users")
 
-ggplot(Divvy2018,aes(Divvy2018$usertype))+geom_bar(fill="#B3DDF2")+scale_x_discrete(name="User Type")+scale_y_continuous(name="Trips in 2018",labels=scales::comma)+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Trips by Usertype in 2018")
+ggplot(Divvy2018,aes(Divvy2018$usertype))+geom_bar(fill="#B3DDF2")+scale_x_discrete(name="User Type")+scale_y_continuous(name="Trips in 2018",labels=scales::comma)+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Usertypes of Users")
 
-ggplot(Divvy2018,aes(x=Divvy2018$typeofday,y=Divvy2018$tripduration))+geom_boxplot()+ggtitle("Trip Duration on Weekdays and Weeknds")+xlab("")+ylab("Trip Duration")+scale_y_continuous(limits=c(0,3600))+stat_summary(fun.y = mean, geom="text",colour="darkblue", vjust=0.7,aes( label=round(..y.., digits=1)))
+ggplot(Divvy2018,aes(x=Divvy2018$start_date))+geom_line(stat='count',color="#B3DDF2")+theme(panel.background = element_rect(fill = 'grey44'))+xlab("Date")+ylab("Trips in 2018")+ggtitle("Trips throughout 2018")
 
 ggplot(Divvy2018,aes(Divvy2018$dayofweek))+geom_bar(aes(y = (..count..)/sum(..count..)),fill="#B3DDF2")+scale_x_discrete(name="Day of the Week",limits=c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))+scale_y_continuous(name="Percentage of Trips per Day",labels=scales::percent)+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Trip Perentage per Weekday")
 
 ggplot(Divvy2018,aes(Divvy2018$month))+geom_bar(aes(y = (..count..)/sum(..count..)),fill="#B3DDF2")+scale_x_discrete(name="Month",labels=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"))+scale_y_continuous(name="Percentage of Trips per Day",labels=scales::percent)+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Trip Perentage per Month")
+
+ggplot(Divvy2018,aes(x=Divvy2018$typeofday,y=Divvy2018$tripduration))+geom_boxplot()+ggtitle("Trip Duration for Weekdays and Weeknds")+xlab("")+ylab("Trip Duration")+scale_y_continuous(limits=c(0,3600))+stat_summary(fun.y = mean, geom="text",colour="darkblue", vjust=0.7,aes( label=round(..y.., digits=1)))
+
+ggplot(Divvy2018,aes(x=Divvy2018$gender,y=Divvy2018$tripduration))+geom_boxplot()+ggtitle("Trip Duration for Gender")+xlab("")+ylab("Trip Duration")+scale_y_continuous(limits=c(0,3600))+stat_summary(fun.y = mean, geom="text",colour="darkblue", vjust=0.7,aes( label=round(..y.., digits=1)))
+
+aggmonth=aggregate(Divvy2018,by=list(Divvy2018$month),FUN=mean)
+aggmonth$month=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+ggplot(aggmonth,aes(x=aggmonth$month,y=aggmonth$tripduration))+geom_bar(stat="identity",fill="#B3DDF2")+xlim(c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("AverageTrip Perentage per Month")+xlab("")+ylab("Average Trip Duration (s)")
+
+aggdow=aggregate(Divvy2018,by=list(Divvy2018$dayofweek),FUN=mean)
+aggdow$dayofweek=c("Fri","Mon","Sat","Sun","Thu","Tue","Wed")
+ggplot(aggdow,aes(x=aggdow$dayofweek,y=aggdow$tripduration))+geom_bar(stat="identity",fill="#B3DDF2")+xlim(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Trip Perentage per Month")+xlab("")+ylab("Average Trip Duration (s)")
 
 Top10Start=as.data.frame(head(sort(table(Divvy2018$from_station_name),decreasing=TRUE),n=10))
 ggplot(Divvy2018,aes(Divvy2018$from_station_name))+geom_bar(fill="#B3DDF2")+scale_x_discrete(name="Starting Station",limits=Top10Start$Var1)+scale_y_discrete(name="Trips over 2018",limits = c(25000,60100))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Top 10 Most Popular Starting Stations")+ theme(axis.text.x = element_text(angle = 90))
@@ -96,12 +113,14 @@ ggplot(Divvy2018,aes(Divvy2018$from_station_name))+geom_bar(fill="#B3DDF2")+scal
 Top10To=as.data.frame(head(sort(table(Divvy2018$to_station_name),decreasing=TRUE),n=10))
 ggplot(Divvy2018,aes(Divvy2018$to_station_name))+geom_bar(fill="#B3DDF2")+scale_x_discrete(name="Ending Station",limits=Top10To$Var1)+scale_y_discrete(name="Trips over 2018",limits = c(25000,60100))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Top 10 Most Popular Ending Stations")+ theme(axis.text.x = element_text(angle = 90))
 
-#Create Data.Fram with Data to be used
+
+# In this next session I attempted to see if regressiona analysis was a possible prediction method for tripduration
+#Create Data.Fram with Data to be used for regression testing
 DivvyR=Divvy2018[,c(2,3,8)]
 
 #Checking Correlation for Numeric Data
-cor(Divvy2018$tripduration,Divvy2018$start_time)
-cor(Divvy2018$tripduration,Divvy2018$age)
+cor.test(Divvy2018$tripduration,Divvy2018$start_time)
+cor.test(Divvy2018$tripduration,Divvy2018$age)
 #neither is strongly indicating any influence over tripduration
 
 #Creating Dummies to Determine Correlated Variables
@@ -110,15 +129,15 @@ library(fastDummies)
 #DUmmy for Gender
 dummygender=dummy_cols(Divvy2018$gender)
 DivvyR$GenderDummy=dummygender[,3]
-cor(DivvyR$tripduration,DivvyR$GenderDummy)
+cor.test(DivvyR$tripduration,DivvyR$GenderDummy)
 #Dummy for Usertype
 dummyuser=dummy_cols(Divvy2018$usertype)
 DivvyR$userdummy=dummyuser[,3]
-cor(DivvyR$tripduration,DivvyR$userdummy)
+cor.test(DivvyR$tripduration,DivvyR$userdummy)
 #Dummy for Type of Day
 dummydaytype=dummy_cols(Divvy2018$typeofday)
 DivvyR$daytypedummy=dummydaytype[,3]
-cor(DivvyR$tripduration,DivvyR$daytypedummy)
+cor.test(DivvyR$tripduration,DivvyR$daytypedummy)
 #Dummy for Day of the Week
 dummymonth=dummy_cols(Divvy2018$dayofweek)
 DivvyR$tuesdaydummy=dummymonth[,3]
@@ -167,4 +186,22 @@ DivvyR$q4dummy=dummyq[,5]
 cor(DivvyR$tripduration,DivvyR$q4dummy)
 #The best predictors appear to be usertype, gender and type of day. Though none of the correlations are particularly strong
 
+#An attempt at making the a regression out of the most correlated data
 summary(lm(DivvyR$tripduration~DivvyR$userdummy+DivvyR$GenderDummy+DivvyR$daytypedummy))
+# The results show that all the variables are statistically significant but do no have significant predicting power as only 6.95% of the errors is explained by them
+#From here variable reduction reduces the predictive power of the model
+
+#We will now try to see if there is anyway to predict whether tripduration goes beyond the alotted 30 minutes (1800 seconds for a ride)
+
+install.packages("rpart.plot")
+library(rpart)
+library(rpart.plot)
+
+DivvyC=Divvy2018[,c(2:3,6:13)]
+Divvy.train=DivvyC[split==1,]
+Divvy.test=DivvyC[split==2,]
+
+rTree=rpart(tripduration~.,data=Divvy.train)
+rpart.plot(rTree)
+#Here we see that the only two of the attributes are able to give an approximation for
+#It is giving us a mean for where the tripduration would fall
