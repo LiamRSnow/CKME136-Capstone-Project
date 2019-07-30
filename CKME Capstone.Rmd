@@ -101,11 +101,16 @@ ggplot(Divvy2018,aes(x=Divvy2018$gender,y=Divvy2018$tripduration))+geom_boxplot(
 
 aggmonth=aggregate(Divvy2018,by=list(Divvy2018$month),FUN=mean)
 aggmonth$month=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
-ggplot(aggmonth,aes(x=aggmonth$month,y=aggmonth$tripduration))+geom_bar(stat="identity",fill="#B3DDF2")+xlim(c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("AverageTrip Perentage per Month")+xlab("")+ylab("Average Trip Duration (s)")
+ggplot(aggmonth,aes(x=aggmonth$month,y=aggmonth$tripduration))+geom_bar(stat="identity",fill="#B3DDF2")+xlim(c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Average Trip Duration per Month")+xlab("")+ylab("Average Trip Duration (s)")
 
 aggdow=aggregate(Divvy2018,by=list(Divvy2018$dayofweek),FUN=mean)
 aggdow$dayofweek=c("Fri","Mon","Sat","Sun","Thu","Tue","Wed")
 ggplot(aggdow,aes(x=aggdow$dayofweek,y=aggdow$tripduration))+geom_bar(stat="identity",fill="#B3DDF2")+xlim(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Average Trip Duration per Day of the Week")+xlab("")+ylab("Average Trip Duration (s)")
+
+aggtime=aggregate(Divvy2018,by=list(Divvy2018$start_time),FUN=mean)
+aggmonth$month=c("12am","1am","2am","3am","4am","5am","6am","7am","8am","9am","10am","11am","12pm","1pm","2pm","3pm","4pm","5pm","6pm","7pm","8pm","9pm","10pm","11pm")
+ggplot(aggtime,aes(x=aggtime
+$start_time,y=aggtime$tripduration))+geom_bar(stat="identity",fill="#B3DDF2")+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Average Trip Duration per Hour of the Day")+xlab("")+ylab("Average Trip Duration (s)")+xlim(c("12am","1am","2am","3am","4am","5am","6am","7am","8am","9am","10am","11am","12pm","1pm","2pm","3pm","4pm","5pm","6pm","7pm","8pm","9pm","10pm","11pm"))
 
 Top10Start=as.data.frame(head(sort(table(Divvy2018$from_station_name),decreasing=TRUE),n=10))
 ggplot(Divvy2018,aes(Divvy2018$from_station_name))+geom_bar(fill="#B3DDF2")+scale_x_discrete(name="Starting Station",limits=Top10Start$Var1)+scale_y_discrete(name="Trips over 2018",limits = c(25000,60100))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Top 10 Most Popular Starting Stations")+ theme(axis.text.x = element_text(angle = 90))
