@@ -81,9 +81,9 @@ summary(Divvy2018)
 sd(Divvy2018$tripduration)
 
 #Visualizing Data
-ggplot(data=Divvy2018, aes(Divvy2018$tripduration))+geom_histogram(binwidth=150,fill="#B3DDF2")+scale_x_continuous(name = "Trip Duration (s)")+scale_y_continuous(name="Trips in 2018",labels=scales::comma,limits=c(0,600000))+ggtitle("Frequency of Trip Duration")+theme(panel.background = element_rect(fill = 'grey44'))
+ggplot(data=Divvy2018, aes(Divvy2018$tripduration))+geom_histogram(binwidth=150,fill="#B3DDF2")+scale_x_continuous(name = "Trip Duration (s)")+scale_y_continuous(name="Trips in 2018",labels=scales::comma,limits=c(0,600000))+ggtitle("Frequency of Trip Duration")+theme(panel.background = element_rect(fill = 'grey44'))+geom_vline(aes(xintercept = mean(tripduration)),col='darkblue',size=1,linetype="longdash")
 
-ggplot(data=Divvy2018, aes(Divvy2018$age))+geom_histogram(binwidth=2,fill="#B3DDF2")+scale_x_continuous(name = "Age")+scale_y_continuous(name="Frequency")+ggtitle("Age of Users")+theme(panel.background = element_rect(fill = 'grey44'))
+ggplot(data=Divvy2018, aes(Divvy2018$age))+geom_histogram(binwidth=2,fill="#B3DDF2")+scale_x_continuous(name = "Age")+scale_y_continuous(name="Frequency")+ggtitle("Age of Users")+theme(panel.background = element_rect(fill = 'grey44'))+geom_vline(aes(xintercept = mean(age)),col='darkblue',size=1,linetype="longdash")
 
 ggplot(Divvy2018,aes(Divvy2018$gender))+geom_bar(fill="#B3DDF2")+scale_x_discrete(name="Gender")+scale_y_continuous(name="Trips in 2018",labels=scales::comma)+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Gender of Users")
 
@@ -105,7 +105,7 @@ ggplot(aggmonth,aes(x=aggmonth$month,y=aggmonth$tripduration))+geom_bar(stat="id
 
 aggdow=aggregate(Divvy2018,by=list(Divvy2018$dayofweek),FUN=mean)
 aggdow$dayofweek=c("Fri","Mon","Sat","Sun","Thu","Tue","Wed")
-ggplot(aggdow,aes(x=aggdow$dayofweek,y=aggdow$tripduration))+geom_bar(stat="identity",fill="#B3DDF2")+xlim(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Trip Perentage per Month")+xlab("")+ylab("Average Trip Duration (s)")
+ggplot(aggdow,aes(x=aggdow$dayofweek,y=aggdow$tripduration))+geom_bar(stat="identity",fill="#B3DDF2")+xlim(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Trip Perentage per Day of the Week")+xlab("")+ylab("Average Trip Duration (s)")
 
 Top10Start=as.data.frame(head(sort(table(Divvy2018$from_station_name),decreasing=TRUE),n=10))
 ggplot(Divvy2018,aes(Divvy2018$from_station_name))+geom_bar(fill="#B3DDF2")+scale_x_discrete(name="Starting Station",limits=Top10Start$Var1)+scale_y_discrete(name="Trips over 2018",limits = c(25000,60100))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Top 10 Most Popular Starting Stations")+ theme(axis.text.x = element_text(angle = 90))
