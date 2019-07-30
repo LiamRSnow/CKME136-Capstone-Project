@@ -105,7 +105,7 @@ ggplot(aggmonth,aes(x=aggmonth$month,y=aggmonth$tripduration))+geom_bar(stat="id
 
 aggdow=aggregate(Divvy2018,by=list(Divvy2018$dayofweek),FUN=mean)
 aggdow$dayofweek=c("Fri","Mon","Sat","Sun","Thu","Tue","Wed")
-ggplot(aggdow,aes(x=aggdow$dayofweek,y=aggdow$tripduration))+geom_bar(stat="identity",fill="#B3DDF2")+xlim(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Trip Perentage per Day of the Week")+xlab("")+ylab("Average Trip Duration (s)")
+ggplot(aggdow,aes(x=aggdow$dayofweek,y=aggdow$tripduration))+geom_bar(stat="identity",fill="#B3DDF2")+xlim(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Average Trip Duration per Day of the Week")+xlab("")+ylab("Average Trip Duration (s)")
 
 Top10Start=as.data.frame(head(sort(table(Divvy2018$from_station_name),decreasing=TRUE),n=10))
 ggplot(Divvy2018,aes(Divvy2018$from_station_name))+geom_bar(fill="#B3DDF2")+scale_x_discrete(name="Starting Station",limits=Top10Start$Var1)+scale_y_discrete(name="Trips over 2018",limits = c(25000,60100))+theme(panel.background = element_rect(fill = 'grey44'))+ggtitle("Top 10 Most Popular Starting Stations")+ theme(axis.text.x = element_text(angle = 90))
